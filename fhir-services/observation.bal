@@ -67,6 +67,40 @@ service /fhir/r4/Observation on new fhirr4:Listener(config = observationApiConfi
         }
         return searchResult;
     }
+
+    // Create a new Observation resource
+    isolated resource function post .(r4:FHIRContext fhirContext, Observation observation) returns Observation|r4:OperationOutcome|r4:FHIRError|error {
+        anydata|r4:OperationOutcome|r4:FHIRError|error result;
+        lock {
+            result = createResource(fhirContext, "Observation", observation, uscore311:USCoreLaboratoryResultObservationProfile);
+        }
+        if result is Observation {
+            return result;
+        }
+        if result is r4:OperationOutcome|r4:FHIRError|error {
+            return result;
+        }
+        return r4:createFHIRError("Unexpected resource type returned from FHIR server", r4:ERROR, r4:PROCESSING,
+            httpStatusCode = http:STATUS_INTERNAL_SERVER_ERROR);
+    }
+
+    // Update an existing Observation resource completely
+    isolated resource function put [string id](r4:FHIRContext fhirContext, Observation observation) returns Observation|r4:OperationOutcome|r4:FHIRError|error {
+        anydata|r4:OperationOutcome|r4:FHIRError|error result;
+        lock {
+            result = updateResource(fhirContext, "Observation", id, observation, uscore311:USCoreLaboratoryResultObservationProfile);
+        }
+        if result is Observation {
+            return result;
+        }
+        if result is r4:OperationOutcome|r4:FHIRError|error {
+            return result;
+        }
+        return r4:createFHIRError("Unexpected resource type returned from FHIR server", r4:ERROR, r4:PROCESSING,
+            httpStatusCode = http:STATUS_INTERNAL_SERVER_ERROR);
+    }
 }
+
+
 
 
